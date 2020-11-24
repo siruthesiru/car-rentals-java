@@ -6,6 +6,10 @@
 package com.lentrix.demos.db;
 import com.lentrix.demos.models.Car;
 import java.sql.PreparedStatement;
+import java.util.List;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -24,5 +28,30 @@ public class CarDAO {
         ps.setInt(5, car.getYear());
         
         ps.executeUpdate();
+    }
+    
+    public static List<Car> getAll() throws Exception {
+        Statement st = DB.conn().createStatement();
+        ResultSet rs = st.executeQuery("SELECT * FROM cars ORDER BY make, model");
+        
+        ArrayList<Car> cars = new ArrayList();
+        
+        while(rs.next()) {
+            Car c = new Car(
+                    rs.getInt("id"),
+                    rs.getString("make"),
+                    rs.getString("model"),
+                    rs.getString("color"),
+                    rs.getString("plate"),
+                    rs.getInt("year")
+            );
+            
+            cars.add(c);
+        }
+        
+        st.close();
+        rs.close();
+        
+        return cars;
     }
 }

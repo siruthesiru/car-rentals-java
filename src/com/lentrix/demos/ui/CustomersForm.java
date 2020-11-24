@@ -5,12 +5,16 @@
  */
 package com.lentrix.demos.ui;
 
+import com.lentrix.demos.db.CustomerDAO;
+import com.lentrix.demos.models.Customer;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author lentrix
  */
 public class CustomersForm extends javax.swing.JDialog {
-
+    Customer current = null;
     /**
      * Creates new form CustomersForm
      */
@@ -30,15 +34,15 @@ public class CustomersForm extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        lnameTxt = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        fnameTxt = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        phoneNumberTxt = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        addressTxt = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        licNoTxt = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         newBtn = new javax.swing.JButton();
         saveBtn = new javax.swing.JButton();
@@ -56,30 +60,40 @@ public class CustomersForm extends javax.swing.JDialog {
 
         jLabel1.setText("Last Name");
         jPanel1.add(jLabel1);
-        jPanel1.add(jTextField1);
+        jPanel1.add(lnameTxt);
 
         jLabel2.setText("First Name");
         jPanel1.add(jLabel2);
-        jPanel1.add(jTextField2);
+        jPanel1.add(fnameTxt);
 
         jLabel3.setText("Phone Number");
         jPanel1.add(jLabel3);
-        jPanel1.add(jTextField3);
+        jPanel1.add(phoneNumberTxt);
 
         jLabel4.setText("Address");
         jPanel1.add(jLabel4);
-        jPanel1.add(jTextField4);
+        jPanel1.add(addressTxt);
 
         jLabel5.setText("License Number");
         jPanel1.add(jLabel5);
-        jPanel1.add(jTextField5);
+        jPanel1.add(licNoTxt);
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 8, 3));
 
         newBtn.setText("New");
+        newBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(newBtn);
 
         saveBtn.setText("Save");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(saveBtn);
 
         findBtn.setText("Find");
@@ -145,6 +159,43 @@ public class CustomersForm extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newBtnActionPerformed
+        current = null;
+        clearFields();
+    }//GEN-LAST:event_newBtnActionPerformed
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        if(current==null) {
+            //Insert
+            Customer c = new Customer(
+                    -1,
+                    lnameTxt.getText(),
+                    fnameTxt.getText(),
+                    phoneNumberTxt.getText(),
+                    addressTxt.getText(),
+                    licNoTxt.getText()
+            );
+            
+            try{
+                CustomerDAO.add(c);
+                JOptionPane.showMessageDialog(this, "A new customer has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                clearFields();
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }else {
+            //TODO Update
+        }
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void clearFields() {
+        lnameTxt.setText(null);
+        fnameTxt.setText(null);
+        phoneNumberTxt.setText(null);
+        addressTxt.setText(null);
+        licNoTxt.setText(null);
+        lnameTxt.grabFocus();
+    }
     /**
      * @param args the command line arguments
      */
@@ -188,8 +239,10 @@ public class CustomersForm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField addressTxt;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JButton findBtn;
+    private javax.swing.JTextField fnameTxt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -201,12 +254,10 @@ public class CustomersForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField licNoTxt;
+    private javax.swing.JTextField lnameTxt;
     private javax.swing.JButton newBtn;
+    private javax.swing.JTextField phoneNumberTxt;
     private javax.swing.JButton saveBtn;
     // End of variables declaration//GEN-END:variables
 }

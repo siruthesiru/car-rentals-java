@@ -5,18 +5,46 @@
  */
 package com.lentrix.demos.ui;
 
+import com.lentrix.demos.db.CarDAO;
+import com.lentrix.demos.db.CustomerDAO;
+import com.lentrix.demos.db.RentalDAO;
+import com.lentrix.demos.models.Car;
+import com.lentrix.demos.models.Customer;
+import com.lentrix.demos.models.Rental;
+import java.sql.Date;
+import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author lentrix
  */
 public class RentalsForm extends javax.swing.JDialog {
-
+    private Rental current = null;
     /**
      * Creates new form CustomersForm
      */
     public RentalsForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        populateComboBoxes();
+    }
+    
+    private void populateComboBoxes() {
+        try {
+            List<Car> cars = CarDAO.getAll();
+            cars.add(0, null);
+            carCB.setModel(new DefaultComboBoxModel(cars.toArray()));
+            
+            
+            List<Customer> customers = CustomerDAO.getAll();
+            customers.add(0, null);
+            
+            customerCB.setModel(new DefaultComboBoxModel(customers.toArray()));
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);            
+        }
     }
 
     /**
@@ -30,15 +58,15 @@ public class RentalsForm extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        customerCB = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        carCB = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
         dateTakenTxt = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         dateReturnedTxt = new javax.swing.JFormattedTextField();
         jLabel5 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        amountTxt = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         newBtn = new javax.swing.JButton();
         saveBtn = new javax.swing.JButton();
@@ -56,34 +84,46 @@ public class RentalsForm extends javax.swing.JDialog {
 
         jLabel1.setText("Customer");
         jPanel1.add(jLabel1);
-        jPanel1.add(jTextField1);
+
+        jPanel1.add(customerCB);
 
         jLabel2.setText("Car");
         jPanel1.add(jLabel2);
-        jPanel1.add(jTextField2);
+
+        jPanel1.add(carCB);
 
         jLabel3.setText("Date Taken");
         jPanel1.add(jLabel3);
 
-        dateTakenTxt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("y/MM/dd"))));
+        dateTakenTxt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("y-MM-dd"))));
         jPanel1.add(dateTakenTxt);
 
         jLabel4.setText("Date Returned");
         jPanel1.add(jLabel4);
 
-        dateReturnedTxt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("y/MM/dd"))));
+        dateReturnedTxt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("y-MM-dd"))));
         jPanel1.add(dateReturnedTxt);
 
         jLabel5.setText("Amount Deposited");
         jPanel1.add(jLabel5);
-        jPanel1.add(jTextField5);
+        jPanel1.add(amountTxt);
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 8, 3));
 
         newBtn.setText("New");
+        newBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(newBtn);
 
         saveBtn.setText("Save");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(saveBtn);
 
         findBtn.setText("Find");
@@ -149,6 +189,42 @@ public class RentalsForm extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newBtnActionPerformed
+        current = null;
+        clearFields();
+    }//GEN-LAST:event_newBtnActionPerformed
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        if(current==null) {
+            
+            Rental r = new Rental(
+                    -1,
+                    (Customer)customerCB.getSelectedItem(),
+                    (Car)carCB.getSelectedItem(),
+                    Date.valueOf(dateTakenTxt.getText()),
+                    Date.valueOf(dateReturnedTxt.getText()),
+                    Float.parseFloat(amountTxt.getText())
+            );
+            
+            try {
+                RentalDAO.add(r);
+                JOptionPane.showMessageDialog(this, "New Rental record added.", "Success!", JOptionPane.INFORMATION_MESSAGE);
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }else {
+            //TODO update rental
+            System.out.println("Wala");
+        }
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void clearFields() {
+        customerCB.setSelectedIndex(0);
+        carCB.setSelectedIndex(0);
+        dateTakenTxt.setText(null);
+        dateReturnedTxt.setText(null);
+        amountTxt.setText(null);
+    }
     /**
      * @param args the command line arguments
      */
@@ -193,6 +269,9 @@ public class RentalsForm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField amountTxt;
+    private javax.swing.JComboBox<Car> carCB;
+    private javax.swing.JComboBox<Customer> customerCB;
     private javax.swing.JFormattedTextField dateReturnedTxt;
     private javax.swing.JFormattedTextField dateTakenTxt;
     private javax.swing.JButton deleteBtn;
@@ -208,9 +287,6 @@ public class RentalsForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JButton newBtn;
     private javax.swing.JButton saveBtn;
     // End of variables declaration//GEN-END:variables

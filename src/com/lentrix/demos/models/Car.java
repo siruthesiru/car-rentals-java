@@ -68,7 +68,7 @@ public class Car {
 
     @Override
     public String toString() {
-        return make + " " + model + "[" + plate + "]";
+        return make + " " + model + " [" + plate + "]";
     }
 
     public int getId() {

@@ -5,12 +5,16 @@
  */
 package com.lentrix.demos.ui;
 
+import com.lentrix.demos.db.CarDAO;
+import com.lentrix.demos.models.Car;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author lentrix
  */
 public class CarsForm extends javax.swing.JDialog {
-
+    private Car currentCar = null;
     /**
      * Creates new form CustomersForm
      */
@@ -77,9 +81,19 @@ public class CarsForm extends javax.swing.JDialog {
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 8, 3));
 
         newBtn.setText("New");
+        newBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(newBtn);
 
         saveBtn.setText("Save");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(saveBtn);
 
         findBtn.setText("Find");
@@ -145,6 +159,41 @@ public class CarsForm extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newBtnActionPerformed
+        currentCar = null;
+        clearFields();
+    }//GEN-LAST:event_newBtnActionPerformed
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        if(currentCar==null) {
+            Car c = new Car(
+                -1, makeTxt.getText(), 
+                modelTxt.getText(), 
+                colorTxt.getText(), 
+                plateTxt.getText(), 
+                Integer.parseInt(yearTxt.getText())
+            );
+            try {
+                CarDAO.add(c);
+                JOptionPane.showMessageDialog(this, "A new car has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                clearFields();
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }else {
+            //TODO save for update
+        }
+        
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void clearFields() {
+        makeTxt.setText(null);
+        modelTxt.setText(null);
+        colorTxt.setText(null);
+        plateTxt.setText(null);
+        yearTxt.setText(null);
+        makeTxt.grabFocus();
+    }
     /**
      * @param args the command line arguments
      */
