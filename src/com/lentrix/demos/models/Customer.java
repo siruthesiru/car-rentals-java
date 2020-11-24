@@ -79,4 +79,35 @@ public class Customer {
     public void setId(int id) {
         this.id = id;
     }
+    
+    public boolean validate(StringBuffer errors) {
+        boolean isValid = true;
+        
+        if(lname.isBlank()) {
+            errors.append("The last name should not be empty.\n");
+            isValid = false;
+        }
+        
+        if(fname.isBlank()) {
+            errors.append("The fist name should not be empty.\n");
+            isValid = false;
+        }
+        
+        if(phone.isBlank()) {
+            errors.append("The phone number should not be empty.\n");
+            isValid = false;
+        }
+        
+        if(address.isBlank()) {
+            errors.append("The address should not be empty.\n");
+            isValid = false;
+        }
+        
+        if(licNo.isBlank()) {
+            errors.append("The license number should not be empty.\n");
+            isValid = false;
+        }
+        
+        return isValid;
+    }
 }

@@ -6,6 +6,7 @@
 package com.lentrix.demos.models;
 
 import java.sql.Date;
+import java.time.LocalDate;
 /**
  *
  * @author lentrix
@@ -83,6 +84,41 @@ public class Rental {
         this.id = id;
     }
     
-    
+    public boolean validate(StringBuffer errors) {
+        boolean isValid = true;
+        
+        if(customer==null) {
+            errors.append("The customer should not be empty.\n");
+            isValid = false;
+        }
+        
+        if(car==null) {
+            errors.append("The car should not be empty.\n");
+            isValid = false;
+        }
+        
+        
+        LocalDate taken = dateTaken.toLocalDate();
+        LocalDate returned = dateReturned.toLocalDate();
+        LocalDate now = LocalDate.now();
+        LocalDate earliest = LocalDate.of(now.getYear()-1, now.getMonth(), now.getDayOfMonth());
+        
+        if(taken.isBefore(earliest) || taken.isAfter(now)) {
+            errors.append("The value for date taken is invalid.\n");
+            isValid = false;
+        }
+        
+        if(returned.isBefore(taken) || returned.isAfter(now)) {
+            errors.append("The value for date returned is invalid.\n");
+            isValid = false;
+        }
+        
+        if(deposit <= 0) {
+            errors.append("The deposit value is invalid.");
+            isValid = false;
+        }
+        
+        return isValid;
+    }
     
 }

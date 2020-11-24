@@ -177,9 +177,14 @@ public class CustomersForm extends javax.swing.JDialog {
             );
             
             try{
-                CustomerDAO.add(c);
-                JOptionPane.showMessageDialog(this, "A new customer has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                clearFields();
+                StringBuffer errors = new StringBuffer();
+                if(c.validate(errors)){
+                    CustomerDAO.add(c);
+                    JOptionPane.showMessageDialog(this, "A new customer has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    clearFields();
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
             }catch(Exception ex) {
                 JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
             }

@@ -166,17 +166,26 @@ public class CarsForm extends javax.swing.JDialog {
 
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         if(currentCar==null) {
-            Car c = new Car(
-                -1, makeTxt.getText(), 
-                modelTxt.getText(), 
-                colorTxt.getText(), 
-                plateTxt.getText(), 
-                Integer.parseInt(yearTxt.getText())
-            );
+                
             try {
-                CarDAO.add(c);
-                JOptionPane.showMessageDialog(this, "A new car has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
-                clearFields();
+                Car c = new Car(
+                    -1, makeTxt.getText(), 
+                    modelTxt.getText(), 
+                    colorTxt.getText(), 
+                    plateTxt.getText(), 
+                    Integer.parseInt(yearTxt.getText())
+                );
+                
+                StringBuffer errors = new StringBuffer();
+                if(c.validate(errors)) {
+                    CarDAO.add(c);
+                    JOptionPane.showMessageDialog(this, "A new car has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    clearFields();
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "You entered an invalid year.", "Error!", JOptionPane.ERROR_MESSAGE);
             }catch(Exception ex) {
                 JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
             }

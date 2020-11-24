@@ -196,19 +196,27 @@ public class RentalsForm extends javax.swing.JDialog {
 
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         if(current==null) {
-            
-            Rental r = new Rental(
-                    -1,
-                    (Customer)customerCB.getSelectedItem(),
-                    (Car)carCB.getSelectedItem(),
-                    Date.valueOf(dateTakenTxt.getText()),
-                    Date.valueOf(dateReturnedTxt.getText()),
-                    Float.parseFloat(amountTxt.getText())
-            );
-            
             try {
-                RentalDAO.add(r);
-                JOptionPane.showMessageDialog(this, "New Rental record added.", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                Rental r = new Rental(
+                        -1,
+                        (Customer)customerCB.getSelectedItem(),
+                        (Car)carCB.getSelectedItem(),
+                        Date.valueOf(dateTakenTxt.getText()),
+                        Date.valueOf(dateReturnedTxt.getText()),
+                        Float.parseFloat(amountTxt.getText())
+                );
+                
+                StringBuffer errors = new StringBuffer();
+                if(r.validate(errors)) {
+                    RentalDAO.add(r);
+                    JOptionPane.showMessageDialog(this, "New Rental record added.", "Success!", JOptionPane.INFORMATION_MESSAGE);
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "The value for amount deposited is invalid.", "Error!", JOptionPane.ERROR_MESSAGE);
+            }catch(IllegalArgumentException ex) { 
+                JOptionPane.showMessageDialog(this, "One or more of the date entries are invalid.\n", "Error!", JOptionPane.ERROR_MESSAGE);
             }catch(Exception ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
             }

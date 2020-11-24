@@ -5,6 +5,8 @@
  */
 package com.lentrix.demos.models;
 
+import java.util.Calendar;
+
 /**
  *
  * @author lentrix
@@ -77,5 +79,38 @@ public class Car {
 
     public void setId(int id) {
         this.id = id;
+    }
+    
+    public boolean validate(StringBuffer errors) {
+        boolean isValid = true;
+        
+        if(make.isBlank()) {
+            errors.append("The make field should not be blank.\n");
+            isValid = false;
+        }
+        
+        if(model.isBlank()) {
+            errors.append("The model field should not be blank.\n");
+            isValid = false;
+        }
+        
+        if(color.isBlank()) {
+            errors.append("The color field should not be blank.\n");
+            isValid = false;
+        }
+        
+        if(plate.isBlank()) {
+            errors.append("The plate number field should not be blank.\n");
+            isValid = false;
+        }
+        
+        Calendar cal = Calendar.getInstance();
+        int currentYear = cal.get(Calendar.YEAR);
+        if(year<1950 || year>currentYear) {
+            errors.append("The year value should be between " + 1950 + " and " + currentYear);
+            isValid = false;
+        }
+        
+        return isValid;
     }
 }
