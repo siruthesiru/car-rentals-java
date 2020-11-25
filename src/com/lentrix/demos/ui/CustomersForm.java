@@ -7,7 +7,9 @@ package com.lentrix.demos.ui;
 
 import com.lentrix.demos.db.CustomerDAO;
 import com.lentrix.demos.models.Customer;
+import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -15,12 +17,33 @@ import javax.swing.JOptionPane;
  */
 public class CustomersForm extends javax.swing.JDialog {
     Customer current = null;
+    List<Customer> customerList = null;
     /**
      * Creates new form CustomersForm
      */
     public CustomersForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        try {
+            customerList = CustomerDAO.getAll();
+            tabulate();
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void tabulate() throws Exception {
+        String[] headers = {"Last Name","First Name", "Address", "Phone"};
+        
+        DefaultTableModel model = new DefaultTableModel(headers, 0);
+        
+        for(Customer c: customerList) {
+            model.addRow(new Object[] {c.getLname(), c.getFname(), c.getAddress(), c.getPhone()});
+        }
+        
+        customersTable.setModel(model);
+        customersTable.revalidate();
     }
 
     /**
@@ -50,7 +73,7 @@ public class CustomersForm extends javax.swing.JDialog {
         deleteBtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        customersTable = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -104,7 +127,7 @@ public class CustomersForm extends javax.swing.JDialog {
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        customersTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -115,7 +138,12 @@ public class CustomersForm extends javax.swing.JDialog {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        customersTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                customersTableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(customersTable);
 
         jPanel3.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -193,6 +221,20 @@ public class CustomersForm extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_saveBtnActionPerformed
 
+    private void customersTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_customersTableMouseClicked
+        int index = customersTable.getSelectedRow();
+        
+        current = customerList.get(index);
+        //populate data to form
+        lnameTxt.setText(current.getLname());
+        fnameTxt.setText(current.getFname());
+        addressTxt.setText(current.getAddress());
+        phoneNumberTxt.setText(current.getPhone());
+        licNoTxt.setText(current.getLicNo());
+        
+        lnameTxt.grabFocus();
+    }//GEN-LAST:event_customersTableMouseClicked
+
     private void clearFields() {
         lnameTxt.setText(null);
         fnameTxt.setText(null);
@@ -245,6 +287,7 @@ public class CustomersForm extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField addressTxt;
+    private javax.swing.JTable customersTable;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JButton findBtn;
     private javax.swing.JTextField fnameTxt;
@@ -258,7 +301,6 @@ public class CustomersForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTextField licNoTxt;
     private javax.swing.JTextField lnameTxt;
     private javax.swing.JButton newBtn;
