@@ -4,8 +4,14 @@
  * and open the template in the editor.
  */
 package com.lentrix.demos.db;
+import com.lentrix.demos.models.Car;
+import com.lentrix.demos.models.Customer;
 import com.lentrix.demos.models.Rental;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 /**
  *
  * @author lentrix
@@ -22,5 +28,49 @@ public class RentalDAO {
         ps.setFloat(5, rental.getDeposit());
         
         ps.executeUpdate();
+    }
+    
+    public static List<Rental> getAll() throws Exception {
+        Statement st = DB.conn().createStatement();
+        ResultSet rs = st.executeQuery(
+                "SELECT rentals.*, cars.*, customers.* FROM rentals "
+                        + "LEFT JOIN cars ON cars.id = rentals.car_id "
+                        + "LEFT JOIN customers ON customers.id=rentals.customer_id "
+                        + "ORDER BY date_taken DESC");
+        
+        ArrayList<Rental> rentals = new ArrayList();
+        
+        while(rs.next()) {
+            Car car = new Car(
+                    rs.getInt("cars.id"),
+                    rs.getString("cars.make"),
+                    rs.getString("cars.model"),
+                    rs.getString("cars.color"),
+                    rs.getString("cars.plate"),
+                    rs.getInt("cars.year")
+            );
+            
+            Customer cust = new Customer(
+                    rs.getInt("customers.id"),
+                    rs.getString("customers.lname"),
+                    rs.getString("customers.fname"),
+                    rs.getString("customers.phone"),
+                    rs.getString("customers.address"),
+                    rs.getString("customers.lic_no")
+            );
+            
+            Rental rental = new Rental(
+                    rs.getInt("rentals.id"), 
+                    cust, 
+                    car, 
+                    rs.getDate("date_taken"), 
+                    rs.getDate("date_returned"), 
+                    rs.getFloat("deposit"));
+            
+            rentals.add(rental);
+        }
+        
+        return rentals;
+        
     }
 }

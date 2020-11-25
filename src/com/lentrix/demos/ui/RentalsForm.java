@@ -11,10 +11,12 @@ import com.lentrix.demos.db.RentalDAO;
 import com.lentrix.demos.models.Car;
 import com.lentrix.demos.models.Customer;
 import com.lentrix.demos.models.Rental;
-import java.sql.Date;
+
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import java.sql.Date;
 
 /**
  *
@@ -22,6 +24,7 @@ import javax.swing.JOptionPane;
  */
 public class RentalsForm extends javax.swing.JDialog {
     private Rental current = null;
+    private List<Rental> rentals = null;
     /**
      * Creates new form CustomersForm
      */
@@ -29,6 +32,25 @@ public class RentalsForm extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         populateComboBoxes();
+        
+        try {
+            rentals = RentalDAO.getAll();
+            tabulate();
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void tabulate() {
+        String[] headers = {"Customer", "Car", "Date Taken", "Date Returned"};
+        DefaultTableModel model = new DefaultTableModel(headers, 0);
+        
+        for(Rental r: rentals) {
+            model.addRow(new Object[] {r.getCustomer(), r.getCar(), r.getDateTaken(), r.getDateReturned()});
+        }
+        
+        rentalsTable.setModel(model);
+        rentalsTable.revalidate();
     }
     
     private void populateComboBoxes() {
@@ -74,7 +96,7 @@ public class RentalsForm extends javax.swing.JDialog {
         deleteBtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        rentalsTable = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -134,7 +156,7 @@ public class RentalsForm extends javax.swing.JDialog {
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        rentalsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -145,7 +167,12 @@ public class RentalsForm extends javax.swing.JDialog {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        rentalsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                rentalsTableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(rentalsTable);
 
         jPanel3.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -226,6 +253,19 @@ public class RentalsForm extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_saveBtnActionPerformed
 
+    private void rentalsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_rentalsTableMouseClicked
+        int index = rentalsTable.getSelectedRow();
+        current = rentals.get(index);
+        if(current!=null) {
+            
+            customerCB.setSelectedIndex( getCustomerIndex(current.getCustomer().getId()) );
+            carCB.setSelectedIndex( getCarIndex(current.getCar().getId()) );
+            dateTakenTxt.setText(current.getDateTaken().toString());
+            dateReturnedTxt.setText(current.getDateReturned().toString());
+            amountTxt.setText(String.valueOf(current.getDeposit()));
+        }
+    }//GEN-LAST:event_rentalsTableMouseClicked
+
     private void clearFields() {
         customerCB.setSelectedIndex(0);
         carCB.setSelectedIndex(0);
@@ -274,6 +314,22 @@ public class RentalsForm extends javax.swing.JDialog {
                 dialog.setVisible(true);
             }
         });
+        
+        
+    }
+    
+    private int getCarIndex(int id) {
+        for(int i=1; i<carCB.getItemCount(); i++) {
+            if(carCB.getItemAt(i).getId() == id) return i;
+        }
+        return 0;
+    }
+    
+    private int getCustomerIndex(int id) {
+        for(int i=1; i<customerCB.getItemCount(); i++) {
+            if(customerCB.getItemAt(i).getId() == id) return i;
+        }
+        return 0;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -294,8 +350,8 @@ public class RentalsForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
     private javax.swing.JButton newBtn;
+    private javax.swing.JTable rentalsTable;
     private javax.swing.JButton saveBtn;
     // End of variables declaration//GEN-END:variables
 }
