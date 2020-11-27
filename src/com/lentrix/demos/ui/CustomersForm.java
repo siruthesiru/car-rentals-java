@@ -217,7 +217,29 @@ public class CustomersForm extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
             }
         }else {
-            //TODO Update
+            try {
+                
+                current.setLname(lnameTxt.getText());
+                current.setFname(fnameTxt.getText());
+                current.setPhone(phoneNumberTxt.getText());
+                current.setAddress(addressTxt.getText());
+                current.setLicNo(licNoTxt.getText());
+                
+                StringBuffer errors = new StringBuffer();
+                
+                if(current.validate(errors)) {
+                    
+                    CustomerDAO.update(current);
+                    JOptionPane.showMessageDialog(this, "Customer has been updated.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    tabulate();
+                    
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);                    
+                }
+            
+            }catch(Exception ex) {
+                
+            }
         }
     }//GEN-LAST:event_saveBtnActionPerformed
 

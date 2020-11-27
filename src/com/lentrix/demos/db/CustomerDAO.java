@@ -54,4 +54,21 @@ public class CustomerDAO {
         
         return customers;
     }
+    
+    public static void update(Customer cust) throws Exception {
+        PreparedStatement ps = DB.conn().prepareStatement(
+                "UPDATE customers SET lname=?, fname=?, phone=?, address=?, lic_no=? "
+                        + "WHERE id=?");
+        
+        ps.setString(1, cust.getLname());
+        ps.setString(2, cust.getFname());
+        ps.setString(3, cust.getPhone());
+        ps.setString(4, cust.getAddress());
+        ps.setString(5, cust.getLicNo());
+        ps.setInt(6, cust.getId());
+        
+        ps.executeUpdate();
+        
+        ps.close();
+    }
 }

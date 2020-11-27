@@ -54,4 +54,20 @@ public class CarDAO {
         
         return cars;
     }
+    
+    public static void update(Car car) throws Exception {
+        PreparedStatement ps = DB.conn().prepareStatement(
+                "UPDATE cars SET make=?, model=?, color=?, plate=?, year=? "
+                        + "WHERE id=?");
+        ps.setString(1, car.getMake());
+        ps.setString(2, car.getModel());
+        ps.setString(3, car.getColor());
+        ps.setString(4, car.getPlate());
+        ps.setInt(5, car.getYear());
+        ps.setInt(6, car.getId());
+        
+        ps.executeUpdate();
+        
+        ps.close();
+    }
 }

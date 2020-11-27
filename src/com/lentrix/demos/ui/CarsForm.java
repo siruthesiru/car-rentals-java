@@ -217,7 +217,30 @@ public class CarsForm extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
             }
         }else {
-            //TODO save for update
+            try {
+                
+                currentCar.setMake(makeTxt.getText());
+                currentCar.setModel(modelTxt.getText());
+                currentCar.setColor(colorTxt.getText());
+                currentCar.setPlate(plateTxt.getText());
+                currentCar.setYear(Integer.parseInt(yearTxt.getText()));
+                
+                StringBuffer errors = new StringBuffer();
+                
+                if(currentCar.validate(errors)) {
+                    
+                    CarDAO.update(currentCar);
+                    JOptionPane.showMessageDialog(this, "Car has been updated.", "Updated!", JOptionPane.INFORMATION_MESSAGE);                    
+                    tabulate();
+                    
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "The year is invalid", "Error!", JOptionPane.ERROR_MESSAGE);                                
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);                
+            }
         }
         
     }//GEN-LAST:event_saveBtnActionPerformed
