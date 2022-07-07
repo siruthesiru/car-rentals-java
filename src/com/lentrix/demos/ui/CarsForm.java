@@ -5,18 +5,44 @@
  */
 package com.lentrix.demos.ui;
 
+import com.lentrix.demos.db.CarDAO;
+import com.lentrix.demos.models.Car;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author lentrix
  */
 public class CarsForm extends javax.swing.JDialog {
-
+    private Car currentCar = null;
+    private List<Car> carList = null;
     /**
      * Creates new form CustomersForm
      */
     public CarsForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        try {
+            carList = CarDAO.getAll();
+            tabulate();
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(),"Error!", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void tabulate() throws Exception {
+        String[] headers = {"Make", "Model", "Color", "Year", "Plate"};
+        
+        DefaultTableModel model = new DefaultTableModel(headers, 0);
+        
+        for(Car c: carList) {
+            model.addRow(new Object[] {c.getMake(), c.getModel(), c.getYear(), c.getPlate()});
+        }
+        
+        carsTable.setModel(model);
+        carsTable.revalidate();
     }
 
     /**
@@ -46,7 +72,7 @@ public class CarsForm extends javax.swing.JDialog {
         deleteBtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        carsTable = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -77,20 +103,35 @@ public class CarsForm extends javax.swing.JDialog {
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 8, 3));
 
         newBtn.setText("New");
+        newBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(newBtn);
 
         saveBtn.setText("Save");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(saveBtn);
 
         findBtn.setText("Find");
         jPanel2.add(findBtn);
 
         deleteBtn.setText("Delete");
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(deleteBtn);
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        carsTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -101,7 +142,12 @@ public class CarsForm extends javax.swing.JDialog {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        carsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                carsTableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(carsTable);
 
         jPanel3.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -145,6 +191,114 @@ public class CarsForm extends javax.swing.JDialog {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newBtnActionPerformed
+        currentCar = null;
+        clearFields();
+    }//GEN-LAST:event_newBtnActionPerformed
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        if(currentCar==null) {
+                
+            try {
+                Car c = new Car(
+                    -1, makeTxt.getText(), 
+                    modelTxt.getText(), 
+                    colorTxt.getText(), 
+                    plateTxt.getText(), 
+                    Integer.parseInt(yearTxt.getText())
+                );
+                
+                StringBuffer errors = new StringBuffer();
+                if(c.validate(errors)) {
+                    CarDAO.add(c);
+                    carList.add(c);
+                    JOptionPane.showMessageDialog(this, "A new car has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    clearFields();
+                    tabulate();
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "You entered an invalid year.", "Error!", JOptionPane.ERROR_MESSAGE);
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }else {
+            try {
+                
+                currentCar.setMake(makeTxt.getText());
+                currentCar.setModel(modelTxt.getText());
+                currentCar.setColor(colorTxt.getText());
+                currentCar.setPlate(plateTxt.getText());
+                currentCar.setYear(Integer.parseInt(yearTxt.getText()));
+                
+                StringBuffer errors = new StringBuffer();
+                
+                if(currentCar.validate(errors)) {
+                    
+                    CarDAO.update(currentCar);
+                    JOptionPane.showMessageDialog(this, "Car has been updated.", "Updated!", JOptionPane.INFORMATION_MESSAGE);                    
+                    tabulate();
+                    
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "The year is invalid", "Error!", JOptionPane.ERROR_MESSAGE);                                
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);                
+            }
+        }
+        
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void carsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_carsTableMouseClicked
+        int index = carsTable.getSelectedRow();
+        
+        currentCar = carList.get(index);
+        
+        if(currentCar != null) {
+            //populate data to form
+            makeTxt.setText(currentCar.getMake());
+            modelTxt.setText(currentCar.getModel());
+            colorTxt.setText(currentCar.getColor());
+            yearTxt.setText(String.valueOf(currentCar.getYear()));
+            plateTxt.setText(currentCar.getPlate());
+            
+            makeTxt.grabFocus();
+        }
+    }//GEN-LAST:event_carsTableMouseClicked
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if(currentCar!=null){
+            int response = JOptionPane.showConfirmDialog(this, "Are you sure about deleting the selected car?", "Delete?", JOptionPane.YES_NO_OPTION);
+            
+            if(response == JOptionPane.YES_OPTION){
+                try{
+                    CarDAO.delete(currentCar);
+                    carList.remove(currentCar);
+                    currentCar = null;
+                    tabulate();
+                    clearFields();
+                   }catch(Exception ex){
+                       JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);                
+                   }
+            }
+            
+        }else{
+            JOptionPane.showMessageDialog(this,"No item to delete.", "Nothing to delete!", JOptionPane.ERROR_MESSAGE);                
+
+        }
+    }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private void clearFields() {
+        makeTxt.setText(null);
+        modelTxt.setText(null);
+        colorTxt.setText(null);
+        plateTxt.setText(null);
+        yearTxt.setText(null);
+        makeTxt.grabFocus();
+    }
     /**
      * @param args the command line arguments
      */
@@ -189,6 +343,7 @@ public class CarsForm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable carsTable;
     private javax.swing.JTextField colorTxt;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JButton findBtn;
@@ -202,7 +357,6 @@ public class CarsForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTextField makeTxt;
     private javax.swing.JTextField modelTxt;
     private javax.swing.JButton newBtn;

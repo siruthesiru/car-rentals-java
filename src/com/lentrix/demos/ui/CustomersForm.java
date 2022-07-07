@@ -5,18 +5,45 @@
  */
 package com.lentrix.demos.ui;
 
+import com.lentrix.demos.db.CustomerDAO;
+import com.lentrix.demos.models.Customer;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author lentrix
  */
 public class CustomersForm extends javax.swing.JDialog {
-
+    Customer current = null;
+    List<Customer> customerList = null;
     /**
      * Creates new form CustomersForm
      */
     public CustomersForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        try {
+            customerList = CustomerDAO.getAll();
+            tabulate();
+        }catch(Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void tabulate() throws Exception {
+        String[] headers = {"Last Name","First Name", "Address", "Phone"};
+        
+        DefaultTableModel model = new DefaultTableModel(headers, 0);
+        
+        for(Customer c: customerList) {
+            model.addRow(new Object[] {c.getLname(), c.getFname(), c.getAddress(), c.getPhone()});
+        }
+        
+        customersTable.setModel(model);
+        customersTable.revalidate();
     }
 
     /**
@@ -30,15 +57,15 @@ public class CustomersForm extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        lnameTxt = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        fnameTxt = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
+        phoneNumberTxt = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
+        addressTxt = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
+        licNoTxt = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         newBtn = new javax.swing.JButton();
         saveBtn = new javax.swing.JButton();
@@ -46,7 +73,7 @@ public class CustomersForm extends javax.swing.JDialog {
         deleteBtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        customersTable = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -56,41 +83,56 @@ public class CustomersForm extends javax.swing.JDialog {
 
         jLabel1.setText("Last Name");
         jPanel1.add(jLabel1);
-        jPanel1.add(jTextField1);
+        jPanel1.add(lnameTxt);
 
         jLabel2.setText("First Name");
         jPanel1.add(jLabel2);
-        jPanel1.add(jTextField2);
+        jPanel1.add(fnameTxt);
 
         jLabel3.setText("Phone Number");
         jPanel1.add(jLabel3);
-        jPanel1.add(jTextField3);
+        jPanel1.add(phoneNumberTxt);
 
         jLabel4.setText("Address");
         jPanel1.add(jLabel4);
-        jPanel1.add(jTextField4);
+        jPanel1.add(addressTxt);
 
         jLabel5.setText("License Number");
         jPanel1.add(jLabel5);
-        jPanel1.add(jTextField5);
+        jPanel1.add(licNoTxt);
 
         jPanel2.setLayout(new java.awt.GridLayout(1, 4, 8, 3));
 
         newBtn.setText("New");
+        newBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(newBtn);
 
         saveBtn.setText("Save");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(saveBtn);
 
         findBtn.setText("Find");
         jPanel2.add(findBtn);
 
         deleteBtn.setText("Delete");
+        deleteBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteBtnActionPerformed(evt);
+            }
+        });
         jPanel2.add(deleteBtn);
 
         jPanel3.setLayout(new java.awt.BorderLayout());
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        customersTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -101,7 +143,12 @@ public class CustomersForm extends javax.swing.JDialog {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        customersTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                customersTableMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(customersTable);
 
         jPanel3.add(jScrollPane2, java.awt.BorderLayout.CENTER);
 
@@ -122,7 +169,7 @@ public class CustomersForm extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 316, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 939, Short.MAX_VALUE)))
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 870, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -141,10 +188,114 @@ public class CustomersForm extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        setSize(new java.awt.Dimension(1307, 712));
+        setSize(new java.awt.Dimension(1238, 712));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void newBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newBtnActionPerformed
+        current = null;
+        clearFields();
+    }//GEN-LAST:event_newBtnActionPerformed
+
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        if(current==null) {
+            //Insert
+            Customer c = new Customer(
+                    -1,
+                    lnameTxt.getText(),
+                    fnameTxt.getText(),
+                    phoneNumberTxt.getText(),
+                    addressTxt.getText(),
+                    licNoTxt.getText()
+            );
+            
+            try{
+                StringBuffer errors = new StringBuffer();
+                if(c.validate(errors)){
+                    CustomerDAO.add(c);
+                    JOptionPane.showMessageDialog(this, "A new customer has been added to the record.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    customerList.add(c);
+                    clearFields();
+                    tabulate();
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);
+                }
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this,ex.getMessage(), "Error!", JOptionPane.ERROR_MESSAGE);
+            }
+        }else {
+            try {
+                
+                current.setLname(lnameTxt.getText());
+                current.setFname(fnameTxt.getText());
+                current.setPhone(phoneNumberTxt.getText());
+                current.setAddress(addressTxt.getText());
+                current.setLicNo(licNoTxt.getText());
+                
+                StringBuffer errors = new StringBuffer();
+                
+                if(current.validate(errors)) {
+                    
+                    CustomerDAO.update(current);
+                    JOptionPane.showMessageDialog(this, "Customer has been updated.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    tabulate();
+                    
+                }else {
+                    JOptionPane.showMessageDialog(this, errors.toString(), "Error!", JOptionPane.ERROR_MESSAGE);                    
+                }
+            
+            }catch(Exception ex) {
+                JOptionPane.showMessageDialog(this, "Somethings up.", "Error!", JOptionPane.ERROR_MESSAGE);                    
+
+            }
+        }
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void customersTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_customersTableMouseClicked
+        int index = customersTable.getSelectedRow();
+        
+        current = customerList.get(index);
+        //populate data to form
+        lnameTxt.setText(current.getLname());
+        fnameTxt.setText(current.getFname());
+        addressTxt.setText(current.getAddress());
+        phoneNumberTxt.setText(current.getPhone());
+        licNoTxt.setText(current.getLicNo());
+        
+        lnameTxt.grabFocus();
+    }//GEN-LAST:event_customersTableMouseClicked
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        if(current!=null){
+            int response = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this customer?", "Delete", JOptionPane.YES_NO_OPTION);
+            
+            if(response == JOptionPane.YES_OPTION){
+                try{
+                    CustomerDAO.delete(current);
+                    customerList.remove(current);
+                    current = null;
+                    tabulate();
+                    clearFields();
+                    
+                }catch(Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Somethings up.", "Error!", JOptionPane.ERROR_MESSAGE);                    
+
+                }
+            }
+        }else{
+            JOptionPane.showMessageDialog(this, "No customer selected.", "Error!", JOptionPane.ERROR_MESSAGE);                    
+
+        }
+    }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private void clearFields() {
+        lnameTxt.setText(null);
+        fnameTxt.setText(null);
+        phoneNumberTxt.setText(null);
+        addressTxt.setText(null);
+        licNoTxt.setText(null);
+        lnameTxt.grabFocus();
+    }
     /**
      * @param args the command line arguments
      */
@@ -188,8 +339,11 @@ public class CustomersForm extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField addressTxt;
+    private javax.swing.JTable customersTable;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JButton findBtn;
+    private javax.swing.JTextField fnameTxt;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -200,13 +354,10 @@ public class CustomersForm extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField licNoTxt;
+    private javax.swing.JTextField lnameTxt;
     private javax.swing.JButton newBtn;
+    private javax.swing.JTextField phoneNumberTxt;
     private javax.swing.JButton saveBtn;
     // End of variables declaration//GEN-END:variables
 }
